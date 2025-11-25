@@ -1,0 +1,30 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: #1a1a1a;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+}
+
+.navbar-logo img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+.navbar-logo span {
+  font-size: 1.5rem;
+  font-weight: bold;
+}
+
+.navbar-links button {
+  margin-left: 1rem;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
