@@ -1,12 +1,18 @@
 import os
 import subprocess
 import sys
+import time
 
 def main():
     """
     Sets up the environment and runs the sentiment chatbot application.
     """
-    backend_dir = os.path.join(os.path.dirname(__file__), 'backend')
+    base_dir = os.path.dirname(__file__)
+    backend_dir = os.path.join(base_dir, 'backend')
+    frontend_dir = os.path.join(base_dir, 'frontend-react')
+    
+    # --- Backend Setup ---
+    print("--- Setting up Backend ---")
     
     # Create a virtual environment
     venv_dir = os.path.join(backend_dir, 'venv')
@@ -21,34 +27,39 @@ def main():
         python_executable = os.path.join(venv_dir, 'bin', 'python')
 
     # Install dependencies
-    print("Installing dependencies...")
+    print("Installing backend dependencies...")
     subprocess.check_call([
         python_executable, '-m', 'pip', 'install', '-r',
         os.path.join(backend_dir, 'requirements.txt')
     ])
 
-    # Run the Flask application
+    # Start the Flask application in the background
     print("Starting the backend server...")
-    subprocess.Popen([
+    backend_process = subprocess.Popen([
         python_executable,
         os.path.join(backend_dir, 'app', 'main.py')
     ])
-
-    print("\nBackend server is running.")
-    print("You can now open http://localhost:8000 in your browser.")
-
-    # Start a simple HTTP server for the frontend
-    frontend_dir = os.path.join(os.path.dirname(__file__), 'frontend')
-    os.chdir(frontend_dir)
     
-    import http.server
-    import socketserver
+    print("Backend server started at http://127.0.0.1:5001")
 
-    PORT = 8000
-    Handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", PORT), Handler) as httpd:
-        print(f"Serving at port {PORT}")
-        httpd.serve_forever()
+    # --- Frontend Setup ---
+    print("\n--- Setting up Frontend ---")
+    
+    # Check if node_modules exists, if not install
+    if not os.path.exists(os.path.join(frontend_dir, 'node_modules')):
+        print("Installing frontend dependencies (this may take a while)...")
+        subprocess.check_call(['npm', 'install'], cwd=frontend_dir)
+    else:
+        print("Frontend dependencies already installed.")
+
+    # Start the React application
+    print("Starting the frontend application...")
+    try:
+        subprocess.check_call(['npm', 'start'], cwd=frontend_dir)
+    except KeyboardInterrupt:
+        print("\nStopping application...")
+        backend_process.terminate()
+        sys.exit(0)
 
 if __name__ == '__main__':
     main()

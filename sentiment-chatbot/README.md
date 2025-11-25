@@ -17,10 +17,11 @@ The easiest way to run the project is to use the `run.py` script located in the 
     ```bash
     python run.py
     ```
-    This will automatically create a virtual environment, install the dependencies, and start the backend server.
-
-3.  **Open the frontend:**
-    - Navigate to the `frontend` directory and open `index.html` in your browser.
+    This will automatically:
+    - Create a virtual environment and install backend dependencies.
+    - Start the Flask backend server.
+    - Install frontend dependencies (`npm install`).
+    - Start the React frontend (`npm start`).
 
 ### Manual Setup
 
@@ -52,9 +53,21 @@ If you prefer to set up the project manually, follow these steps:
 
 #### Frontend
 
-1.  **Open the `index.html` file in your browser:**
-    - Navigate to the `sentiment-chatbot/frontend` directory.
-    - Open the `index.html` file directly in a web browser (e.g., by double-clicking it).
+1.  **Navigate to the frontend directory:**
+    ```bash
+    cd sentiment-chatbot/frontend-react
+    ```
+
+2.  **Install dependencies:**
+    ```bash
+    npm install
+    ```
+
+3.  **Start the application:**
+    ```bash
+    npm start
+    ```
+    The application will open at `http://localhost:3000`.
 
 ## Chosen Technologies
 
@@ -63,7 +76,8 @@ If you prefer to set up the project manually, follow these steps:
     -   **Flask:** A lightweight web framework for the backend API.
     -   **NLTK (Natural Language Toolkit):** Used for sentiment analysis, specifically the VADER (Valence Aware Dictionary and sEntiment Reasoner) tool.
 -   **Frontend:**
-    -   **HTML, CSS, JavaScript:** Standard web technologies for the user interface.
+    -   **React:** A JavaScript library for building user interfaces.
+    -   **CSS:** Custom styling for a modern, responsive design.
 
 ## Explanation of Sentiment Logic
 
