@@ -7,8 +7,9 @@ function App() {
   const [theme, setTheme] = useState('dark');
   const [messages, setMessages] = useState([
     {
+      id: 1,
       sender: 'bot',
-      text: "I'd be happy to help you reschedule. What time works best for you?",
+      text: "Hi, User! How may I help you Today!! ",
     },
   ]);
   const [userInput, setUserInput] = useState('');
@@ -32,16 +33,17 @@ function App() {
     scrollToBottom();
   }, [messages]);
 
-  const getSentimentLabel = (compoundScore) => {
-    if (compoundScore >= 0.05) return 'Positive 😊';
-    if (compoundScore <= -0.05) return 'Negative 😠';
-    return 'Neutral 😐';
+  const getSentiment = (compoundScore) => {
+    if (compoundScore >= 0.05) return { label: 'Positive 😊', className: 'sentiment-positive' };
+    if (compoundScore <= -0.05) return { label: 'Negative 😠', className: 'sentiment-negative' };
+    return { label: 'Neutral 😐', className: 'sentiment-neutral' };
   };
 
   const sendMessage = async () => {
     if (!userInput.trim()) return;
 
-    const userMessage = { sender: 'user', text: userInput };
+    const messageId = Date.now();
+    const userMessage = { id: messageId, sender: 'user', text: userInput };
     setMessages((prevMessages) => [...prevMessages, userMessage]);
     const currentInput = userInput;
     setUserInput('');
@@ -57,27 +59,21 @@ function App() {
       const data = await response.json();
 
       if (data.bot_response) {
-        const botMessage = { sender: 'bot', text: data.bot_response };
-        setMessages((prevMessages) => {
-          const lastUserMessageIndex = prevMessages.findLastIndex(
-            (m) => m.sender === 'user' && !m.sentiment
-          );
+        const botMessage = { id: Date.now() + 1, sender: 'bot', text: data.bot_response };
 
-          if (lastUserMessageIndex !== -1) {
-            const updatedMessages = [...prevMessages];
-            const updatedUserMessage = {
-              ...updatedMessages[lastUserMessageIndex],
-              sentiment: data.statement_sentiment,
-            };
-            updatedMessages[lastUserMessageIndex] = updatedUserMessage;
-            return [...updatedMessages, botMessage];
-          }
-          return [...prevMessages, botMessage];
+        setMessages((prevMessages) => {
+          return prevMessages.map((msg) => {
+            if (msg.id === messageId) {
+              return { ...msg, sentiment: data.statement_sentiment };
+            }
+            return msg;
+          }).concat(botMessage);
         });
       }
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = {
+        id: Date.now(),
         sender: 'bot',
         text: 'Sorry, something went wrong. Is the backend running?',
       };
@@ -96,14 +92,14 @@ function App() {
       <Navbar theme={theme} toggleTheme={toggleTheme} />
       <div className="chat-container">
         <div className="chat-box">
-          {messages.map((msg, index) => (
-            <div key={index} className={`message-wrapper ${msg.sender}-wrapper`}>
+          {messages.map((msg) => (
+            <div key={msg.id} className={`message-wrapper ${msg.sender}-wrapper`}>
               <div className={`chat-message ${msg.sender}-message`}>
                 {msg.text}
               </div>
               {msg.sentiment && msg.sender === 'user' && (
-                <div className="sentiment-analysis">
-                  {getSentimentLabel(msg.sentiment.compound)} ({msg.sentiment.compound.toFixed(2)})
+                <div className={`sentiment-analysis ${getSentiment(msg.sentiment.compound).className}`}>
+                  {getSentiment(msg.sentiment.compound).label} ({msg.sentiment.compound.toFixed(2)})
                 </div>
               )}
             </div>

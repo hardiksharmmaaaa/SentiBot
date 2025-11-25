@@ -15,7 +15,7 @@ const Navbar = ({ theme, toggleTheme }) => {
           {theme === 'dark' ? '☀️' : '🌙'}
         </button>
         <a
-          href="https://github.com/cognida-ai-incubator/zuno.dx"
+          href="https://github.com/hardiksharmmaaaa/SentiBot/tree/dev/sentiment-chatbot"
           target="_blank"
           rel="noopener noreferrer"
           className="nav-btn github-btn"
