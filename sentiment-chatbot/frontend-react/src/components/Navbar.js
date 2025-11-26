@@ -1,15 +1,15 @@
 import React from 'react';
 // import './Navbar.css'; // Removing old CSS import as we use global App.css now
 
-const Navbar = ({ theme, toggleTheme }) => {
+const Navbar = ({ theme, toggleTheme, onReportClick }) => {
   return (
     <nav className="navbar">
       <a href="/" className="navbar-brand">
         LiaPlus
       </a>
       <div className="navbar-links">
-        <button className="nav-btn" onClick={() => window.location.href = '/login'}>
-          Login
+        <button className="nav-btn report-btn" onClick={onReportClick}>
+          Sentiment Report
         </button>
         <button className="nav-btn" onClick={toggleTheme}>
           {theme === 'dark' ? '☀️' : '🌙'}

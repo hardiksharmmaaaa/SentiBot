@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './App.css';
 import Navbar from './components/Navbar';
+import SentimentModal from './components/SentimentModal';
 
 function App() {
   console.log('App rendering');
@@ -13,6 +14,9 @@ function App() {
     },
   ]);
   const [userInput, setUserInput] = useState('');
+  const [showModal, setShowModal] = useState(false);
+  const [reportData, setReportData] = useState(null);
+  const [loadingReport, setLoadingReport] = useState(false);
   const messagesEndRef = useRef(null);
 
   const API_URL = 'http://127.0.0.1:5001';
@@ -56,20 +60,59 @@ function App() {
         },
         body: JSON.stringify({ message: currentInput }),
       });
-      const data = await response.json();
 
-      if (data.bot_response) {
-        const botMessage = { id: Date.now() + 1, sender: 'bot', text: data.bot_response };
-
-        setMessages((prevMessages) => {
-          return prevMessages.map((msg) => {
-            if (msg.id === messageId) {
-              return { ...msg, sentiment: data.statement_sentiment };
-            }
-            return msg;
-          }).concat(botMessage);
-        });
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
       }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+
+      // Create a placeholder bot message immediately
+      const botMessageId = Date.now() + 1;
+      const botMessage = { id: botMessageId, sender: 'bot', text: '' };
+      setMessages((prevMessages) => [...prevMessages, botMessage]);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split('\n');
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+
+          try {
+            const data = JSON.parse(line);
+
+            if (data.type === 'sentiment') {
+              // Update user message with sentiment
+              setMessages((prevMessages) => {
+                return prevMessages.map((msg) => {
+                  if (msg.id === messageId) {
+                    return { ...msg, sentiment: data.data };
+                  }
+                  return msg;
+                });
+              });
+            } else if (data.type === 'chunk') {
+              // Append text to bot message
+              setMessages((prevMessages) => {
+                return prevMessages.map((msg) => {
+                  if (msg.id === botMessageId) {
+                    return { ...msg, text: msg.text + data.content };
+                  }
+                  return msg;
+                });
+              });
+            }
+          } catch (e) {
+            console.error("Error parsing JSON chunk", e);
+          }
+        }
+      }
+
     } catch (error) {
       console.error('Error:', error);
       const errorMessage = {
@@ -87,9 +130,32 @@ function App() {
     }
   };
 
+  const handleReportClick = async () => {
+    setShowModal(true);
+    setLoadingReport(true);
+    setReportData(null);
+
+    try {
+      const response = await fetch(`${API_URL}/analyze`);
+      const data = await response.json();
+      setReportData(data);
+    } catch (error) {
+      console.error('Error fetching report:', error);
+      // Ideally show an error state in the modal
+    } finally {
+      setLoadingReport(false);
+    }
+  };
+
   return (
     <div className={`App ${theme}`}>
-      <Navbar theme={theme} toggleTheme={toggleTheme} />
+      <Navbar theme={theme} toggleTheme={toggleTheme} onReportClick={handleReportClick} />
+      <SentimentModal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        isLoading={loadingReport}
+        reportData={reportData}
+      />
       <div className="chat-container">
         <div className="chat-box">
           {messages.map((msg) => (
