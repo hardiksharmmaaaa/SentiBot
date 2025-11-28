@@ -1,0 +1,9 @@
+.git
+.gitignore
+venv/
+frontend-react/node_modules/
+backend/venv/
+backend/__pycache__/
+*.pyc
+.env
+.DS_Store

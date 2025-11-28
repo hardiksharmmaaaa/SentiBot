@@ -19,7 +19,7 @@ function App() {
   const [loadingReport, setLoadingReport] = useState(false);
   const messagesEndRef = useRef(null);
 
-  const API_URL = 'http://127.0.0.1:5001';
+  const API_URL = process.env.NODE_ENV === 'production' ? '' : 'http://127.0.0.1:5001';
 
   const toggleTheme = () => {
     setTheme((prevTheme) => (prevTheme === 'dark' ? 'light' : 'dark'));

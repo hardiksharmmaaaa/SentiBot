@@ -26,7 +26,7 @@ try:
 except LookupError:
     nltk.download('words')
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='../frontend_build', static_url_path='/')
 CORS(app)  # Enable CORS for cross-origin requests
 
 # In-memory conversation history
@@ -137,6 +137,14 @@ def chat():
             })
 
     return Response(stream_with_context(generate()), mimetype='application/x-ndjson')
+
+@app.route('/')
+def index():
+    return app.send_static_file('index.html')
+
+@app.errorhandler(404)
+def not_found(e):
+    return app.send_static_file('index.html')
 
 @app.route('/analyze', methods=['GET'])
 def analyze():
